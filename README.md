@@ -1,5 +1,5 @@
 # BEAM Read me
-# WDC A2 Josephine Athas
+## WDC A2 Josephine Athas
 
 Hi, my name is Josephine, and this is my code for my physical modelling Arduino project 
 for a teacher-student feedback system, the BEAM (Button-Enabled, Assessment Mechanism)
@@ -8,15 +8,22 @@ The code is written in C++ for an Arduino Mega.
 It is a prototype model designed for two students and one teacher.
 
 ## SOFTWARE
-The only library needed to run this code is the servo motor Arduino library which is in the files
+
+The only library needed to run this code is the servo motor Arduino library
+which is available for download at https://docs.arduino.cc/libraries/servo/
+
 Please note that some of the values for the RGBs may differ depending on your hardware
 
 ## HARDWARE
+
 The materials needed to build the physical model are as follows:
   - Arduino mega 2560 Rev3
   - 3x small breadboard
   - 1x micro servo motor SG90
-  - 6x LED - 2 x red, 2 x yellow, 2 x green
+  - Coloured LED
+      - 2 x red
+      - 2 x yellow
+      - 2 x green
   - 2x RGB
   - 7x pushbutton
   - Resistors
