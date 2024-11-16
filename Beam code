@@ -1,3 +1,5 @@
+// Arduino C++ code for BEAM code below
+
 //Including the Servo library to help control the Servo Motor 
 #include <Servo.h>
 
