@@ -1,0 +1,340 @@
+//Including the Servo library to help control the Servo Motor 
+#include <Servo.h>
+
+//Assign Student 1 LED & pushbutton pins 
+int redLed1 = 49; 
+int yellowLed1 = 45; 
+int greenLed1 = 41; 
+
+int redButton1 = 51;
+int yellowButton1 = 47;
+int greenButton1 = 43; 
+
+//Assign Student 2 LED & pushbutton pins 
+int redLed2 = 31; 
+int yellowLed2 = 27; 
+int greenLed2 = 23; 
+
+int redButton2 = 33; 
+int yellowButton2 = 29; 
+int greenButton2 = 25; 
+
+// Assign Teacher RGB, pushbutton
+
+int resetButton = 8; 
+
+//Student 1 RGB LED
+int teacherRedLed1 = 13; 
+int teacherGreenLed1 = 12; 
+int teacherBlueLed1 = 11; 
+
+//Student 2 RGB LED
+int teacherRedLed2 = 5; 
+int teacherGreenLed2 = 4; 
+int teacherBlueLed2 = 3; 
+
+// Assign servo pin
+
+int servoPin = 7; 
+
+Servo myServo; // Define servo from library
+
+//Reset Button for teacher
+int count = 0; // Start count at zero on each reset
+bool buttonDisabled = false; // Buttons are enabled by default
+bool ResetButtonPressed = false; // Reset button assumed unpressed by default
+
+//RGB Student NO.1 logic 
+//All Booleans must default to false. 
+//Which prevents RGB turning on until button press
+
+//Student 1 RGB 
+bool RedPressed1 = false; 
+bool GreenPressed1 = false; 
+bool YellowPressed1 = false; 
+
+//Student 2 RGB 
+bool RedPressed2 = false; 
+bool GreenPressed2 = false; 
+bool YellowPressed2 = false; 
+
+void setup()
+{
+  Serial.begin(9600); // Turn on serial monitor
+  
+  //Assigning pins as inputs/outputs
+  //Student 1 all LEDs
+  pinMode(redLed1, OUTPUT);
+  pinMode(yellowLed1, OUTPUT);
+  pinMode(greenLed1, OUTPUT);
+
+  //Student 1 all buttons 
+  pinMode(redButton1, INPUT);
+  pinMode(yellowButton1, INPUT); 
+  pinMode(greenButton1, INPUT);  
+  
+  //Student 2 all LEDs
+  pinMode(redLed2, OUTPUT);
+  pinMode(yellowLed2, OUTPUT);
+  pinMode(greenLed2, OUTPUT);
+  
+  //Student 2 all buttons
+  pinMode(redButton2, INPUT);
+  pinMode(yellowButton2, INPUT); 
+  pinMode(greenButton2, INPUT); 
+  
+  //Teachers reset button
+  
+  pinMode(resetButton, INPUT);
+  
+  //RGB for Student 1
+  pinMode(teacherRedLed1, OUTPUT); 
+  pinMode(teacherBlueLed1,OUTPUT); 
+  pinMode(teacherGreenLed1, OUTPUT); 
+  
+  //RGB for Student 2
+  pinMode(teacherRedLed2, OUTPUT); 
+  pinMode(teacherBlueLed2, OUTPUT); 
+  pinMode(teacherGreenLed2, OUTPUT); 
+
+  //Attach servo from library to servo pin and sets to 0 degrees
+ 	myServo.attach(servoPin);
+  myServo.write(0); 
+}
+
+void loop()
+{
+  int ResetState = digitalRead(resetButton); 
+  
+//Setting Student 1 RGB colour to 0 / 0 / 0. Which means it is off
+setColor(0,0,0); 
+
+//Setting Second Students RGB colour to 0 / 0 / 0. Which means it is also off
+setColor2(0,0,0); 
+
+  //RGB for Student 1
+
+  //Tracking what button was pressed to therefore turn colour on 
+  //Booleans to turn true and turns the RGB to the right colour. 
+
+  if(RedPressed1 == true){
+      setColor(255,0,0);
+  } 
+  if(YellowPressed1 == true){ 
+      setColor(255,140,0);
+  } 
+  if(GreenPressed1 == true){ 
+      setColor(0,255,0);
+  } 
+  //RGB for Student 2
+
+  //Tracking what button was pressed to therefore turn colour on 
+  //Booleans to turn true and turns the RGB to the right colour. 
+  if(RedPressed2 == true){ 
+    setColor2(255,0,0); 
+  }
+  
+  if(YellowPressed2 == true){ 
+    setColor2(255,90,0); 
+  } 
+  
+  if(GreenPressed2 == true){ 
+    setColor2(0,255,0); 
+  } 
+
+ if(ResetState == HIGH && !ResetButtonPressed){  
+  //Teachers button is pressed - reset system for new input
+    ResetButtonPressed = true; // Recognises reset button has been pressed
+  	count = 0;  // Count resets to zero (allowing for new input)
+  	myServo.write(0); // Servo goes back to zero degrees
+    setColor(0,0,0); // RGB 1 turns off 
+  	setColor2(0,0,0); // RGB 2 turns off
+    buttonDisabled = false; // Students can press buttons again
+    delay(1500); // Allows the system time to register it has been pressed
+  }  
+
+ //Ensures that reset button goes back to false after being pressed
+  if(ResetState == LOW){ 
+    ResetButtonPressed = false; 
+  }
+
+  //Makes sure that when both students have submitted their responses
+  //that there is only a single message output to the teacher 
+  //without delay blocking button inputs 
+
+  if(count == 2 && buttonDisabled){ 
+    Serial.println("All student feedback submitted");
+    count = 0; 
+  } 
+  
+  //Servo instructions
+  //When one student button is pressed and count is at 1, servo turns to 90 degrees
+  if(count == 1){
+    delay(10); 
+  myServo.write(90);
+  } 
+  
+  //When both student buttons are pressed and count is at 2, servo turns to 180 degrees
+  //Prevents students from entering multiple inputs
+  if(ResetButtonPressed){ 
+    if(count == 2){ 
+      myServo.write(180); 
+      buttonDisabled = true; 
+      count = 0; 
+    }
+  }
+
+  //Student 1 (S1) code below
+  
+  int redState1 = digitalRead(redButton1); //Stores information that RedButton has been pressed 
+  int yellowState1 = digitalRead(yellowButton1); // "" YellowButton 
+  int greenState1 = digitalRead(greenButton1);  // "" GreenButton
+  
+  //Student 1's Red button being pressed 
+  //When Red Button has been pressed and not all input is in
+    if(redState1==HIGH && buttonDisabled == false) { 
+      count++; //Add one to count. 
+    
+    Serial.println("Adam is struggling and needs help"); 
+    //print to teachers monitor to indicate Adam's status 
+    
+    digitalWrite(redLed1, HIGH); //Turn the Student 1's Red LED High 
+    RedPressed1 = true; 
+    
+    if(count == 1){ //When student presses button once it sets the servo motor to 90 degrees. 
+      myServo.write(90); 
+      }
+    if(count == 2){ 
+      //If the student pressed the button again it would indicate 
+      //that the servo motor has reached 180 degrees. 
+      myServo.write(180); 
+      } 
+  		delay(3500); 
+  		digitalWrite(redLed1, LOW); 
+  		delay(1000); 
+      }	
+  
+   if(yellowState1==HIGH && buttonDisabled == false){ //S1's yellow button being pressed 
+     count++;
+     
+     Serial.println("Adam is a bit unsure"); 
+      
+  		digitalWrite(yellowLed1, HIGH);
+     
+     YellowPressed1 = true; 
+   
+    if(count == 1){ 
+      myServo.write(90); 
+   			 }
+    if(count == 2){ 
+      myServo.write(180); 
+    } 
+  		delay(1000); 
+  		digitalWrite(yellowLed1, LOW);
+  		delay(1000); 
+     
+   }
+  if(greenState1==HIGH && buttonDisabled == false){ //S1's green button being pressed  
+    count++;
+    
+    Serial.println("Adam is confident"); 
+ 
+  	digitalWrite(greenLed1, HIGH);
+    GreenPressed1 = true; 
+    
+    if(count == 1){ //Tracking the count of each student's button press, 
+    //to help move the servo motor
+      myServo.write(90); 
+    }
+    if(count == 2){ 
+      myServo.write(180); 
+    } 
+  		delay(3500); 
+  		digitalWrite(greenLed1, LOW);
+  		delay(1000); 
+  }
+
+  //Student 2 (S2) code below
+  
+  //Comments as above for S1
+  //Reading the button state of the pull down buttons. 
+  //When not pressed the button should read a 0, then when pressed it should read a 1 
+  
+  int redState2 = digitalRead(redButton2);
+  int yellowState2 = digitalRead(yellowButton2); 
+  int greenState2 = digitalRead(greenButton2); 
+  
+  if(redState2==HIGH && buttonDisabled == false){ //S2's red button being pressed 
+     count++;
+    
+    Serial.println("Bella is struggling and needs help");
+    
+ 		digitalWrite(redLed2, HIGH);
+    RedPressed2 = true; 
+    if(count == 1){ 
+      myServo.write(90); 
+    }
+    if(count == 2){ 
+      myServo.write(180); 
+    } 
+  		delay(3500); 
+  		digitalWrite(redLed2, LOW);
+  		delay(1000); 
+  }
+   if(yellowState2==HIGH && buttonDisabled == false){ //S2's yellow button being pressed 
+      count++; 
+     
+    Serial.println("Bella is a bit unsure"); 
+  	
+     digitalWrite(yellowLed2, HIGH);
+     YellowPressed2 = true; 
+    
+    if(count == 1){ 
+      myServo.write(90); 
+    }
+    if(count == 2){ 
+      myServo.write(180); 
+    } 
+  	 delay(3500); 
+  	 digitalWrite(yellowLed2, LOW);
+  	 delay(1000); 
+     
+   }
+
+  if(greenState2==HIGH && buttonDisabled == false){ //S2's green button being pressed  
+    	count++; 
+  	
+    Serial.println("Bella is confident"); 
+  	
+    digitalWrite(greenLed2, HIGH);
+    
+    GreenPressed2 = true;
+    
+    if(count == 1){ 
+      myServo.write(90); 
+    }
+    if(count == 2){ 
+      myServo.write(180); 
+    } 
+  	delay(3500); 
+  	digitalWrite(greenLed2, LOW);
+  	delay(1000); 
+    
+  } 
+}
+//Student 1 RGB 
+
+//Custom function made for Student 1's RGB colour (for teacher)
+void setColor(int redValue, int greenValue, int blueValue) {
+  analogWrite(teacherRedLed1, redValue);
+  analogWrite(teacherGreenLed1, greenValue);
+  analogWrite(teacherBlueLed1, blueValue);
+}
+//Student 2 RGB 
+
+//Custom function made for Student 2's RGB colour (for teacher)
+void setColor2(int redValue2, int greenValue2, int blueValue2) {
+  analogWrite(teacherRedLed2, redValue2);
+  analogWrite(teacherGreenLed2, greenValue2);
+  analogWrite(teacherBlueLed2, blueValue2);
+}
